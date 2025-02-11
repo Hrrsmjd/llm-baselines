@@ -15,6 +15,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from .activations import get_activation, MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU ## NEW
+
 
 class LayerNorm(nn.Module):
     """ LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False """
@@ -85,7 +87,7 @@ class MLP(nn.Module):
         self.c_fc    = nn.Linear(config.n_embd, 4 * config.n_embd, bias=config.bias)
         self.c_proj  = nn.Linear(4 * config.n_embd, config.n_embd, bias=config.bias)
         self.dropout = nn.Dropout(config.dropout)
-        self.activation = nn.GELU()
+        self.activation = get_activation(config.activation, config) ## NEW
 
     def forward(self, x):
         x = self.c_fc(x)
@@ -234,6 +236,9 @@ class GPTBase(nn.Module):
                 elif pn.endswith("weight") and isinstance(m, BLACKLIST_WEIGHT_MODULES):
                     # weights of blacklist modules will NOT be weight decayed
                     no_decay.add(fpn)
+                elif isinstance(m, (MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU)): ## NEW
+                    # Add learnable activation parameters to no_decay set ## NEW
+                    no_decay.add(fpn) ## NEW
 
         # subtle: 'transformer.wte.weight' and 'lm_head.weight' are tied, so they
         # will appear in the no_decay and decay sets respectively after the above.

@@ -15,7 +15,8 @@ tknzr = tiktoken.get_encoding("gpt2")
 def get_slimpajama_data(num_proc=40):
     if not os.path.exists(os.path.join(SPJ_DATA_PATH, "train.bin")):
         os.makedirs(SPJ_DATA_PATH, exist_ok=True)
-        dataset = load_dataset("DKYoon/SlimPajama-6B")
+        # dataset = load_dataset("DKYoon/SlimPajama-6B") ## NEW
+        dataset = load_dataset("DKYoon/SlimPajama-6B", cache_dir=SPJ_DATA_PATH) ## NEW
 
         split_dataset = dataset["train"].train_test_split(
             test_size=0.0005, seed=2357, shuffle=True
@@ -72,10 +73,14 @@ def get_slimpajama_data(num_proc=40):
 
 def get_slimpajama_chunk1(num_proc=40):
     if not os.path.exists(os.path.join(SPJ_CHUNK_1_DATA_PATH, "train.bin")):
-        os.makedirs(SPJ_DATA_PATH, exist_ok=True)
-        dataset = load_dataset("cerebras/SlimPajama-627B", split="train/chunk1")
+        # os.makedirs(SPJ_DATA_PATH, exist_ok=True) ## NEW
+        # dataset = load_dataset("cerebras/SlimPajama-627B", split="train/chunk1") ## NEW
+        os.makedirs(SPJ_CHUNK_1_DATA_PATH, exist_ok=True) ## NEW
+        dataset = load_dataset("cerebras/SlimPajama-627B", split="train/chunk1", 
+                             cache_dir=SPJ_CHUNK_1_DATA_PATH) ## NEW
 
-        split_dataset = dataset["train"].train_test_split(
+        # split_dataset = dataset["train"].train_test_split( ## NEW
+        split_dataset = dataset.train_test_split( ## NEW
             test_size=0.0005, seed=2357, shuffle=True
         )
         split_dataset["val"] = split_dataset.pop("test")
@@ -101,7 +106,8 @@ def get_slimpajama_chunk1(num_proc=40):
         # concatenate all the ids in each dataset into one large file we can use for training
         for split, dset in tokenized.items():
             arr_len = np.sum(dset["len"])
-            filename = os.path.join(SPJ_DATA_PATH, f"{split}.bin")
+            # filename = os.path.join(SPJ_DATA_PATH, f"{split}.bin") ## NEW
+            filename = os.path.join(SPJ_CHUNK_1_DATA_PATH, f"{split}.bin") ## NEW
             dtype = np.uint16  # (can do since enc.max_token_value == 50256 is < 2**16)
             arr = np.memmap(filename, dtype=dtype, mode="w+", shape=(arr_len,))
             total_batches = min(1024, len(dset))
@@ -119,10 +125,12 @@ def get_slimpajama_chunk1(num_proc=40):
             arr.flush()
 
     train_data = np.memmap(
-        os.path.join(SPJ_DATA_PATH, "train.bin"), dtype=np.uint16, mode="r"
+        # os.path.join(SPJ_DATA_PATH, "train.bin"), dtype=np.uint16, mode="r" ## NEW
+        os.path.join(SPJ_CHUNK_1_DATA_PATH, "train.bin"), dtype=np.uint16, mode="r" ## NEW
     )
     val_data = np.memmap(
-        os.path.join(SPJ_DATA_PATH, "val.bin"), dtype=np.uint16, mode="r"
+        # os.path.join(SPJ_DATA_PATH, "val.bin"), dtype=np.uint16, mode="r" ## NEW
+        os.path.join(SPJ_CHUNK_1_DATA_PATH, "val.bin"), dtype=np.uint16, mode="r" ## NEW
     )
 
     return {"train": train_data, "val": val_data}

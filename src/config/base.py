@@ -10,7 +10,8 @@ def none_or_str(value):
 def parse_args(base_parser, args, namespace):
     parser = base_parser
     # General training params
-    parser.add_argument('--batch_size', default=32, type=int)
+    parser.add_argument('--batch_size', default=32, type=int) ## NEW
+    # parser.add_argument('--batch_size', default=64, type=int) ## NEW
     parser.add_argument('--acc_steps', default=4, type=int)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--data_seed', default=1337, type=int)
@@ -34,6 +35,14 @@ def parse_args(base_parser, args, namespace):
     parser.add_argument('--model', default='base', choices=['base', 'llama2'])
     parser.add_argument('--use_pretrained', default="auto", type=none_or_str) # 'none', 'gpt-2' or a path to the pretraind model
     parser.add_argument('--dropout', default=0.0, type=float)
+    
+    parser.add_argument('--activation', default='relu', choices=['relu', 'relu2', 'relu3', 'gelu', 'silu', 'mrepu', 'mrepu_learnable', 'mrepu_learnable2', 'xrelu', 'xrelu2', 'xrelu3', 'mrelu'], type=str) ## NEW
+    parser.add_argument('--activation_p', default=1.0, type=float, help='p parameter for MRePU activations') ## NEW
+    parser.add_argument('--activation_c', default=0.0, type=float, help='c parameter for MRePU_learnable2') ## NEW
+    parser.add_argument('--activation_alpha', default=1.0, type=float, help='alpha parameter for xReLU') ## NEW
+    parser.add_argument('--activation_a', default=0.0, type=float, help='a parameter for xReLU') ## NEW
+    parser.add_argument('--activation_k', default=0.0, type=float, help='k parameter for xReLU') ## NEW
+
     parser.add_argument('--n_head', default=12, type=int)
     parser.add_argument('--n_layer', default=12, type=int) # depths in att + ff blocks
     parser.add_argument('--n_embd', default=768, type=int) # embedding size / hidden size ... 
