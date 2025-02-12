@@ -36,12 +36,38 @@ def parse_args(base_parser, args, namespace):
     parser.add_argument('--use_pretrained', default="auto", type=none_or_str) # 'none', 'gpt-2' or a path to the pretraind model
     parser.add_argument('--dropout', default=0.0, type=float)
     
-    parser.add_argument('--activation', default='relu', choices=['relu', 'relu2', 'relu3', 'gelu', 'silu', 'mrepu', 'mrepu_learnable', 'mrepu_learnable2', 'xrelu', 'xrelu2', 'xrelu3', 'mrelu'], type=str) ## NEW
+    parser.add_argument('--activation', default='relu', choices=[
+        'relu',
+        'relu2', 
+        'relu3',
+        'gelu',
+        'silu',
+        'elu',
+        'mrepu',
+        'mrepu_learnable',
+        'mrepu_learnable2',
+        'xrelu',
+        'xrelu2',
+        'xrelu3', 
+        'mrelu',
+        'mexp',
+        'msilu',
+        'mgelu',
+        'melu',
+        'm2relu',
+        'm3relu'
+    ], type=str) ## NEW
     parser.add_argument('--activation_p', default=1.0, type=float, help='p parameter for MRePU activations') ## NEW
     parser.add_argument('--activation_c', default=0.0, type=float, help='c parameter for MRePU_learnable2') ## NEW
     parser.add_argument('--activation_alpha', default=1.0, type=float, help='alpha parameter for xReLU') ## NEW
     parser.add_argument('--activation_a', default=0.0, type=float, help='a parameter for xReLU') ## NEW
     parser.add_argument('--activation_k', default=0.0, type=float, help='k parameter for xReLU') ## NEW
+    parser.add_argument('--activation_s', default=0.0, type=float, help='s parameter for mexp') ## NEW
+    parser.add_argument('--activation_b', default=-1.0, type=float, help='b parameter for mexp') ## NEW
+    parser.add_argument('--activation_a_n', default=1.0, type=float, help='a_n parameter for m2relu') ## NEW
+    parser.add_argument('--activation_a_p', default=1.0, type=float, help='a_p parameter for m2relu') ## NEW
+    parser.add_argument('--activation_p_n', default=1.0, type=float, help='p_n parameter for m2relu') ## NEW
+    parser.add_argument('--activation_p_p', default=1.0, type=float, help='p_p parameter for m2relu') ## NEW
 
     parser.add_argument('--n_head', default=12, type=int)
     parser.add_argument('--n_layer', default=12, type=int) # depths in att + ff blocks
