@@ -18,6 +18,8 @@ def get_batch(dataloader, device="cpu"):
 
 @torch.no_grad()
 def eval(model, data_val_iter, device='cpu', max_num_batches=24, ctx=nullcontext()):
+    print(f"[DEBUG] Starting eval - model.training: {model.training}")
+    print(f"[DEBUG] Model type: {type(model)}") 
     assert model.training == False
 
     loss_list_val, acc_list = [], []

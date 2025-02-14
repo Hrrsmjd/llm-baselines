@@ -108,6 +108,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                 epoch = substep//num_substeps_per_epoch
 
                 model.eval()
+                print(f"[DEBUG] Before eval - model.training: {model.training}")
                 train_loss = loss.detach().cpu().item() * acc_steps
                 current_lr = scheduler.get_last_lr()[0] if scheduler is not None else extra_args.lr
                 
@@ -121,6 +122,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                     max_num_batches=eval_steps,
                     ctx=type_ctx,
                 )
+                print(f"[DEBUG] After eval - model.training: {model.training}")
 
                 print_string = f"{epoch}/{itr} [train] loss={train_loss:.3f} [val] loss={val_loss:.3f}, pp={val_perplexity:.2f}, acc={val_acc:3f}"
                 print_string += f" [time per itr] {dt*1000/eval_freq:.2f}ms"
