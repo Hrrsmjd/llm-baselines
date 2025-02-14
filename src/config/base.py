@@ -1,4 +1,5 @@
 import torch
+import argparse
 
 import distributed
 
@@ -6,6 +7,16 @@ def none_or_str(value):
     if value == 'None':
         return None
     return value
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def parse_args(base_parser, args, namespace):
     parser = base_parser
@@ -55,7 +66,8 @@ def parse_args(base_parser, args, namespace):
         'mgelu',
         'melu',
         'm2relu',
-        'm3relu'
+        'm3relu',
+        'mrelu_selective'
     ], type=str) ## NEW
     parser.add_argument('--activation_p', default=1.0, type=float, help='p parameter for MRePU activations') ## NEW
     parser.add_argument('--activation_c', default=0.0, type=float, help='c parameter for MRePU_learnable2') ## NEW
@@ -68,6 +80,10 @@ def parse_args(base_parser, args, namespace):
     parser.add_argument('--activation_a_p', default=1.0, type=float, help='a_p parameter for m2relu') ## NEW
     parser.add_argument('--activation_p_n', default=1.0, type=float, help='p_n parameter for m2relu') ## NEW
     parser.add_argument('--activation_p_p', default=1.0, type=float, help='p_p parameter for m2relu') ## NEW
+    parser.add_argument('--activation_scale', type=str2bool, default=False, help='scale parameter for mrelu_selective')
+    parser.add_argument('--activation_power', type=str2bool, default=False, help='power parameter for mrelu_selective')
+    parser.add_argument('--activation_shift_h', type=str2bool, default=False, help='shift_h parameter for mrelu_selective')
+    parser.add_argument('--activation_shift_v', type=str2bool, default=False, help='shift_v parameter for mrelu_selective')
 
     parser.add_argument('--n_head', default=12, type=int)
     parser.add_argument('--n_layer', default=12, type=int) # depths in att + ff blocks

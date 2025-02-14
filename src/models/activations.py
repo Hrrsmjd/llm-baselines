@@ -271,6 +271,61 @@ class m3ReLU(nn.Module):
     def forward(self, x):
         return self.a_n * torch.pow(F.relu(-(x-self.s)), 1.0 + F.softplus(self.p_n)) + F.softplus(self.a_p) * torch.pow(F.relu(x-self.s), 1.0 + F.softplus(self.p_p)) + self.b
 
+class mReLU_selective(nn.Module):
+    '''
+    Selective version of mReLU that allows turning parameters on/off:
+    (alpha * ReLU(x - a)^p + k)
+    
+    When all parameters are off: ReLU(x)^2
+    alpha (scale) - learnable when scale=True
+    p (power) - learnable when power=True, adds to 1.0 when enabled
+    a (horizontal shift) - learnable when shift_horizontally=True
+    k (vertical shift) - learnable when shift_vertically=True
+    '''
+    def __init__(self, scale=False, power=False, shift_horizontally=False, shift_vertically=False,
+                 alpha=1.0, p=1.0, a=0.0, k=0.0):
+        super(mReLU_selective, self).__init__()
+        
+        print(f"Initializing mReLU_selective with:")
+        print(f"scale: {scale}")
+        print(f"power: {power}")
+        print(f"shift_horizontally: {shift_horizontally}")
+        print(f"shift_vertically: {shift_vertically}")
+        
+        # Initialize parameters based on whether they're enabled
+        if scale:
+            inverse_softplus_alpha = math.log(math.exp(alpha) - 1.0)
+            self.alpha = nn.Parameter(torch.tensor(inverse_softplus_alpha, dtype=torch.float32))
+        else:
+            self.register_buffer('alpha', torch.tensor(1.0))
+            
+        if power:
+            inverse_softplus_p = math.log(math.exp(p) - 1.0)
+            self.p = nn.Parameter(torch.tensor(inverse_softplus_p, dtype=torch.float32))
+        else:
+            self.register_buffer('p', torch.tensor(1.0))  # Will result in power of 2 (1 + 1)
+            
+        if shift_horizontally:
+            self.a = nn.Parameter(torch.tensor(a, dtype=torch.float32))
+        else:
+            self.register_buffer('a', torch.tensor(0.0))
+            
+        if shift_vertically:
+            self.k = nn.Parameter(torch.tensor(k, dtype=torch.float32))
+        else:
+            self.register_buffer('k', torch.tensor(0.0))
+            
+        # Store which parameters are enabled
+        self.scale_enabled = scale
+        self.power_enabled = power
+        self.shift_h_enabled = shift_horizontally
+        self.shift_v_enabled = shift_vertically
+        
+    def forward(self, x):
+        alpha = F.softplus(self.alpha) if self.scale_enabled else self.alpha
+        p = 1.0 + F.softplus(self.p) if self.power_enabled else 2.0
+        return alpha * torch.pow(F.relu(x - self.a), p) + self.k
+
 # Dictionary mapping activation names to their classes
 ACTIVATION_REGISTRY = {
     'relu': nn.ReLU,
@@ -296,6 +351,7 @@ ACTIVATION_REGISTRY = {
     ## NEW
     'm2relu': m2ReLU,
     'm3relu': m3ReLU,
+    'mrelu_selective': mReLU_selective,
 }
 
 def get_activation(activation_name, config=None):
@@ -341,4 +397,23 @@ def get_activation(activation_name, config=None):
         return activation_class(a_n=config.activation_a_n, a_p=config.activation_a_p, p_p=config.activation_p_p, s=config.activation_s, b=config.activation_b)
     elif activation_name == 'm3relu':
         return activation_class(a_n=config.activation_a_n, a_p=config.activation_a_p, p_n=config.activation_p_n, p_p=config.activation_p_p, s=config.activation_s, b=config.activation_b)
+    elif activation_name == 'mrelu_selective':
+        # Convert string representations to boolean
+        def str_to_bool(value):
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, str):
+                return value.lower() in ('true', 't', 'yes', 'y', '1')
+            return bool(value)
+            
+        return activation_class(
+            scale=str_to_bool(getattr(config, 'activation_scale', False)),
+            power=str_to_bool(getattr(config, 'activation_power', False)),
+            shift_horizontally=str_to_bool(getattr(config, 'activation_shift_h', False)),
+            shift_vertically=str_to_bool(getattr(config, 'activation_shift_v', False)),
+            alpha=getattr(config, 'activation_alpha', 1.0),
+            p=getattr(config, 'activation_p', 1.0),
+            a=getattr(config, 'activation_a', 0.0),
+            k=getattr(config, 'activation_k', 0.0)
+        )
     return activation_class() 

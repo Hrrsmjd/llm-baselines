@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from .activations import get_activation, MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU, mExp, mSiLU, mGELU, mELU, m2ReLU, m3ReLU ## NEW
+from .activations import get_activation, MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU, mExp, mSiLU, mGELU, mELU, m2ReLU, m3ReLU, mReLU_selective ## NEW
 
 
 class LayerNorm(nn.Module):
@@ -236,7 +236,7 @@ class GPTBase(nn.Module):
                 elif pn.endswith("weight") and isinstance(m, BLACKLIST_WEIGHT_MODULES):
                     # weights of blacklist modules will NOT be weight decayed
                     no_decay.add(fpn)
-                elif isinstance(m, (MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU, mExp, mSiLU, mGELU, mELU, m2ReLU, m3ReLU)): ## NEW
+                elif isinstance(m, (MRePU_learnable, MRePU_learnable2, xReLU, xReLU2, xReLU3, mReLU, mExp, mSiLU, mGELU, mELU, m2ReLU, m3ReLU, mReLU_selective)): ## NEW
                     # Add learnable activation parameters to no_decay set ## NEW
                     no_decay.add(fpn) ## NEW
 
