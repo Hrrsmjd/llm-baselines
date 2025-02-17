@@ -10,7 +10,9 @@ import copy
 import random
 import os
 import numpy as np
-from .utils import eval, get_batch, save_checkpoint
+# from .utils import eval, get_batch, save_checkpoint
+from .utils import eval as eval_utils
+from .utils import get_batch, save_checkpoint
 
 
 def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, batch_size, sequence_length, eval_freq, ckpt_path, distributed_backend,extra_args, itr=0,rng_state_dict=None):
@@ -57,9 +59,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
         print(f"Compiling model ...")
         model = torch.compile(model) # requires pytorch 2.0+
 
-    print(f"[DEBUG] Before model.train() call: {model.training}")
     model.train()
-    print(f"[DEBUG] After model.train() call: {model.training}")
 
     t0 = time.time()
     
@@ -80,7 +80,6 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
             with type_ctx:
                 with distributed_backend.get_context_for_microstep_forward(model=model, microstep_idx=microstep_idx, gradient_accumulation_steps=acc_steps):
                     outputs = model(x, targets=y)
-                    print(f"[DEBUG] After outputs = model(x, targets=y) call: {model.training}")
 
             loss = outputs['loss'] / acc_steps
             loss.backward()
@@ -103,7 +102,6 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
         scheduler.step()
         opt.zero_grad(set_to_none=True)
         itr += 1
-        print(f"[DEBUG] After opt.zero_grad() call: {model.training}")
 
         if itr % eval_freq == 0 or itr == iterations: # from here it's only evaluation code, all the training is above
             if distributed_backend.is_master_process():
@@ -111,23 +109,24 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                 dt = t1 - t0
                 epoch = substep//num_substeps_per_epoch
 
+                print(f"[DEBUG] Before eval - model.training: {model.training}") 
                 model.eval()
-                print(f"[DEBUG] Before eval - model.training: {model.training}")
+                print(f"[DEBUG] Before eval - model.training: {model.training}") # THIS IS PRINTING TRUE???
                 train_loss = loss.detach().cpu().item() * acc_steps
                 current_lr = scheduler.get_last_lr()[0] if scheduler is not None else extra_args.lr
                 
                 eval_steps = (
                     24 if itr < iterations else len(data["val"])
                 )
-                print(f"[DEBUG] Before eval - model.training: {model.training}")
-                val_acc, val_loss, val_perplexity = eval(
+
+                # val_acc, val_loss, val_perplexity = eval(
+                val_acc, val_loss, val_perplexity = eval_utils(
                     model,
                     data_val_iter,
                     extra_args.device,
                     max_num_batches=eval_steps,
                     ctx=type_ctx,
                 )
-                print(f"[DEBUG] After eval - model.training: {model.training}")
 
                 print_string = f"{epoch}/{itr} [train] loss={train_loss:.3f} [val] loss={val_loss:.3f}, pp={val_perplexity:.2f}, acc={val_acc:3f}"
                 print_string += f" [time per itr] {dt*1000/eval_freq:.2f}ms"
