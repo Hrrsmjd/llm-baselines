@@ -57,7 +57,9 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
         print(f"Compiling model ...")
         model = torch.compile(model) # requires pytorch 2.0+
 
+    print(f"[DEBUG] Before model.train() call: {model.training}")
     model.train()
+    print(f"[DEBUG] After model.train() call: {model.training}")
 
     t0 = time.time()
     
@@ -78,6 +80,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
             with type_ctx:
                 with distributed_backend.get_context_for_microstep_forward(model=model, microstep_idx=microstep_idx, gradient_accumulation_steps=acc_steps):
                     outputs = model(x, targets=y)
+                    print(f"[DEBUG] After outputs = model(x, targets=y) call: {model.training}")
 
             loss = outputs['loss'] / acc_steps
             loss.backward()
@@ -100,6 +103,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
         scheduler.step()
         opt.zero_grad(set_to_none=True)
         itr += 1
+        print(f"[DEBUG] After opt.zero_grad() call: {model.training}")
 
         if itr % eval_freq == 0 or itr == iterations: # from here it's only evaluation code, all the training is above
             if distributed_backend.is_master_process():
@@ -115,6 +119,7 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                 eval_steps = (
                     24 if itr < iterations else len(data["val"])
                 )
+                print(f"[DEBUG] Before eval - model.training: {model.training}")
                 val_acc, val_loss, val_perplexity = eval(
                     model,
                     data_val_iter,

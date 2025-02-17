@@ -142,9 +142,8 @@ def main(args):
 
     ## NEW
     print(f"\nTraining model={args.model} \n{vars(args)}\n")
-    print(f"[DEBUG] Initial model.training state: {model.training}")
+    
     model.eval()
-    print(f"[DEBUG] After model.train() call: {model.training}")
 
     stats = train(model, opt, data, args.data_seed, scheduler, args.iterations, args.acc_steps, args.batch_size, args.sequence_length, 
                   eval_freq=args.eval_freq, 
