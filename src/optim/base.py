@@ -10,10 +10,9 @@ import copy
 import random
 import os
 import numpy as np
-# from .utils import eval, get_batch, save_checkpoint
-from .utils import eval as eval_utils
-from .utils import get_batch, save_checkpoint
-
+from .utils import eval, get_batch, save_checkpoint
+# from .utils import eval as eval_utils
+# from .utils import get_batch, save_checkpoint
 
 def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, batch_size, sequence_length, eval_freq, ckpt_path, distributed_backend,extra_args, itr=0,rng_state_dict=None):
     device_type = 'cuda' if 'cuda' in str(extra_args.device) else 'cpu'
@@ -109,9 +108,9 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                 dt = t1 - t0
                 epoch = substep//num_substeps_per_epoch
 
-                print(f"[DEBUG] Before eval - model.training: {model.training}") 
+                # print(f"[DEBUG] Before eval - model.training: {model.training}") # This correctly prints True
                 model.eval()
-                print(f"[DEBUG] Before eval - model.training: {model.training}") # THIS IS PRINTING TRUE???
+                # print(f"[DEBUG] After eval - model.training: {model.training}") # This inccorectly prints True
                 train_loss = loss.detach().cpu().item() * acc_steps
                 current_lr = scheduler.get_last_lr()[0] if scheduler is not None else extra_args.lr
                 
@@ -119,8 +118,8 @@ def train_base(model, opt, data, data_seed, scheduler, iterations, acc_steps, ba
                     24 if itr < iterations else len(data["val"])
                 )
 
-                # val_acc, val_loss, val_perplexity = eval(
-                val_acc, val_loss, val_perplexity = eval_utils(
+                val_acc, val_loss, val_perplexity = eval(
+                # val_acc, val_loss, val_perplexity = eval_utils(
                     model,
                     data_val_iter,
                     extra_args.device,

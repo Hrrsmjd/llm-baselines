@@ -52,22 +52,22 @@ OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:5" --
 4 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:6" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale False --activation_power False --activation_shift_h False --activation_shift_v True --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-12
+12 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale True --activation_power True --activation_shift_h False --activation_shift_v False --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-13
+13 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale True --activation_power False --activation_shift_h True --activation_shift_v False --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-14
+14 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale True --activation_power False --activation_shift_h False --activation_shift_v True --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-23
+23 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale False --activation_power True --activation_shift_h True --activation_shift_v False --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-24
+24 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale False --activation_power True --activation_shift_h False --activation_shift_v True --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
-34
+34 Done
 OMP_NUM_THREADS=1 python ./src/main.py --config_format base --device "cuda:0" --activation "mrelu_selective" --compile --wandb --wandb_project "llm-baselines" --wandb_run_prefix "mrelu_selective" --activation_scale False --activation_power False --activation_shift_h True --activation_shift_v True --activation_alpha 1.0 --activation_p 1.0 --activation_a 0.0 --activation_k 0.0
 
 123 Done
